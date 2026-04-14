@@ -10,22 +10,17 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+const handleLogin = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/login/', {
         username,
         password
       });
-      
       if (response.data.token) {
-        // Сохраняем токен
         localStorage.setItem('token', response.data.token);
-        
-        // ВАЖНО: Сохраняем роль пользователя (is_staff приходит из Django)
-        // Превращаем в строку, так как localStorage хранит только строки
+        // Сохраняем роль
         localStorage.setItem('isAdmin', response.data.is_staff.toString());
-        
         navigate('/dashboard');
       }
     } catch (err) {

@@ -11,7 +11,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'customer', 'material', 'material_name', 'meters_needed', 'waste_meters', 'status', 'created_at']
+        fields = ['id', 'customer', 'material', 'material_name', 'meters_needed', 'comment', 'waste_meters', 'status', 'created_at'] 
 
 class StockInSerializer(serializers.ModelSerializer):
     class Meta:
