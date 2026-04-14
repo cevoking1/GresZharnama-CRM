@@ -7,11 +7,17 @@ class Material(models.Model):
     def __str__(self):
         return self.name
 
-# Эту модель мы случайно стерли, возвращаем:
 class StockIn(models.Model):
     material = models.ForeignKey(Material, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date_added = models.DateTimeField(auto_now_add=True)
+
+    # Логика: При добавлении прихода, плюсуем метры к материалу
+    def save(self, *args, **kwargs):
+        if not self.pk: # Если это новая запись
+            self.material.stock_meters += self.amount
+            self.material.save()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.material.name} - Приход: {self.amount}м"
@@ -20,29 +26,11 @@ class Order(models.Model):
     customer = models.CharField(max_length=200)
     material = models.ForeignKey(Material, on_delete=models.CASCADE)
     meters_needed = models.DecimalField(max_digits=10, decimal_places=2)
-    
-    # Наше новое поле для брака
     waste_meters = models.DecimalField(max_digits=10, decimal_places=2, default=0) 
-    
     status = models.CharField(max_length=20, default='waiting')
     created_at = models.DateTimeField(auto_now_add=True)
 
-class StockIn(models.Model):
-    material = models.ForeignKey(Material, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date_added = models.DateTimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
-        # Если это новая запись (приход только что создали)
-        if not self.pk:
-            self.material.stock_meters += self.amount
-            self.material.save()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.material.name} - {self.amount}м"
-
-    # Умная логика сохранения и списания со склада
+    # Логика: При завершении заказа, минусуем метры со склада
     def save(self, *args, **kwargs):
         if self.pk:
             old_order = Order.objects.get(pk=self.pk)
@@ -54,3 +42,6 @@ class StockIn(models.Model):
                 self.material.save()
                 
         super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return f"Заказ: {self.customer}"

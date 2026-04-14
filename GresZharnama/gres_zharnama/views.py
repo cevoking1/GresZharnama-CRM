@@ -7,9 +7,11 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
 
 class OrderViewSet(viewsets.ModelViewSet):
+    # Сортируем новые заказы наверх
     queryset = Order.objects.all().order_by('-created_at')
     serializer_class = OrderSerializer
 
 class StockInViewSet(viewsets.ModelViewSet):
-    queryset = StockIn.objects.all()
+    # Сортируем новые закупки наверх, чтобы Асет сразу видел последние поступления
+    queryset = StockIn.objects.all().order_by('-date_added')
     serializer_class = StockInSerializer
